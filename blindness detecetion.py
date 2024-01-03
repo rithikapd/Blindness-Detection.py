@@ -1,105 +1,63 @@
-{
- "cells": [
-  {
-   "cell_type": "code",
-   "execution_count": null,
-   "id": "71cf9b6d",
-   "metadata": {},
-   "outputs": [],
-   "source": [
-    "\n",
-    "import numpy as np\n",
-    "import cv2\n",
-    "\n",
-    "\n",
-    "face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')\n",
-    "eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye_tree_eyeglasses.xml')\n",
-    "\n",
-    "\n",
-    "first_read = True\n",
-    "\n",
-    "\n",
-    "cap = cv2.VideoCapture(0)\n",
-    "\n",
-    "while True:\n",
-    "    ret, img = cap.read()\n",
-    "\n",
-    "  \n",
-    "    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)\n",
-    "\n",
-    "   \n",
-    "    gray = cv2.bilateralFilter(gray, 5, 1, 1)\n",
-    "\n",
-    "   \n",
-    "    faces = face_cascade.detectMultiScale(gray, 1.3, 5, minSize=(200, 200))\n",
-    "\n",
-    "    if len(faces) > 0:\n",
-    "        for (x, y, w, h) in faces:\n",
-    "            img = cv2.rectangle(img, (x, y), (x + w, y + h), (0, 255, 0), 2)\n",
-    "\n",
-    "            \n",
-    "            roi_face = gray[y:y + h, x:x + w]\n",
-    "            roi_face_clr = img[y:y + h, x:x + w]\n",
-    "\n",
-    "            eyes = eye_cascade.detectMultiScale(roi_face, 1.3, 5, minSize=(50, 50))\n",
-    "\n",
-    "           \n",
-    "            if len(eyes) >= 2:\n",
-    "               \n",
-    "                if first_read:\n",
-    "                    cv2.putText(img, \"Eyes detected. Press 's' to begin\", (70, 70),\n",
-    "                                cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 2)\n",
-    "                else:\n",
-    "                    cv2.putText(img, \"Eyes open!\", (70, 70),\n",
-    "                                cv2.FONT_HERSHEY_PLAIN, 2, (255, 255, 255), 2)\n",
-    "            else:\n",
-    "                if first_read:\n",
-    "                    \n",
-    "                    cv2.putText(img, \"No eyes detected\", (70, 70),\n",
-    "                                cv2.FONT_HERSHEY_PLAIN, 3, (0, 0, 255), 2)\n",
-    "                else:\n",
-    "                   \n",
-    "                    print(\"Blink detected--------------\")\n",
-    "                    cv2.waitKey(3000)\n",
-    "                    first_read = True\n",
-    "    else:\n",
-    "        cv2.putText(img, \"No face detected\", (100, 100),\n",
-    "                    cv2.FONT_HERSHEY_PLAIN, 3, (0, 255, 0), 2)\n",
-    "\n",
-    "   \n",
-    "    cv2.imshow('img', img)\n",
-    "    a = cv2.waitKey(1)\n",
-    "\n",
-    "    if a == ord('q'):\n",
-    "        break\n",
-    "    elif a == ord('s') and first_read:\n",
-    "      \n",
-    "        first_read = False\n",
-    "\n",
-    "cap.release()\n",
-    "cv2.destroyAllWindows()\n"
-   ]
-  }
- ],
- "metadata": {
-  "kernelspec": {
-   "display_name": "Python 3 (ipykernel)",
-   "language": "python",
-   "name": "python3"
-  },
-  "language_info": {
-   "codemirror_mode": {
-    "name": "ipython",
-    "version": 3
-   },
-   "file_extension": ".py",
-   "mimetype": "text/x-python",
-   "name": "python",
-   "nbconvert_exporter": "python",
-   "pygments_lexer": "ipython3",
-   "version": "3.11.3"
-  }
- },
- "nbformat": 4,
- "nbformat_minor": 5
-}
+import numpy as np
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+training = pd.read_csv(r'C:\Users\divya\Downloads\train.csv')
+test = pd.read_csv(r'C:\Users\divya\Downloads\train.csv')
+training['train_test'] = 1
+test['train_test'] = 0
+test['Survived'] = np.NaN
+all_data = pd.concat([training,test])
+all_data.columns
+
+training.info()
+
+training.describe()
+
+sns.heatmap(df_num.corr())
+
+pd.pivot_table(training, index = 'Survived', values = ['Age','SibSp','Parch','Fare'])
+
+print(pd.pivot_table(training, index = 'Survived', columns = 'Pclass',
+                     values = 'Ticket' ,aggfunc ='count'))
+print()
+print(pd.pivot_table(training, index = 'Survived', columns = 'Sex', 
+                     values = 'Ticket' ,aggfunc ='count'))
+print()
+print(pd.pivot_table(training, index = 'Survived', columns = 'Embarked', 
+                     values = 'Ticket' ,aggfunc ='count'))
+
+import seaborn as sns
+import matplotlib.pyplot as plt
+
+# Assuming df_cat is your DataFrame
+
+for i in df_cat.columns:
+    plt.figure()  # Create a new figure for each plot
+    sns.barplot(x=df_cat[i].value_counts().index, y=df_cat[i].value_counts())
+    plt.title(i)
+    plt.show()
+
+df_cat.Cabin
+training['cabin_multiple'] = training.Cabin.apply(lambda x: 0 if pd.isna(x) 
+                                                    else len(x.split(' ')))
+training['cabin_multiple'].value_counts()
+
+pd.pivot_table(training, index = 'Survived', columns = 'cabin_multiple',
+               values = 'Ticket' ,aggfunc ='count')
+
+training['cabin_adv'] = training.Cabin.apply(lambda x: str(x)[0])
+#comparing survival rates by cabin
+print(training.cabin_adv.value_counts())
+pd.pivot_table(training,index='Survived',columns='cabin_adv', 
+                        values = 'Name', aggfunc='count')
+training['numeric_ticket'] = training.Ticket.apply(lambda x: 1 if x.isnumeric() else 0)
+training['ticket_letters'] = training.Ticket.apply(lambda x: ''.join(x.split(' ')[:-1])
+                                            .replace('.','').replace('/','')
+                                            .lower() if len(x.split(' ')[:-1]) >0 else 0)
+training.Name.head(50)
+training['name_title'] = training.Name.apply(lambda x: x.split(',')[1]
+                                                        .split('.')[0].strip())
+training['name_title'].value_counts()
